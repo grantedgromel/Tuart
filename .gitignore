@@ -1,0 +1,16 @@
+# Large source assets — NOT needed by the site (only photos/web/ is used).
+# Keep these out of the repo; they live on the artist's machine.
+Turart Photos.zip
+photos/Turarts/
+
+# Reference bundle extracted from Claude Design (private: podcast, .docx, chats)
+design_ref/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp

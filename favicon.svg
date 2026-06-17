@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Turarts">
+  <rect width="64" height="64" rx="13" fill="#14110F"/>
+  <!-- tumar lozenge chain: small — large — small (the design's ornament) -->
+  <g fill="none" stroke="#C9362B" stroke-width="2.4">
+    <rect x="27" y="27" width="10" height="10" transform="rotate(45 32 32)"/>
+  </g>
+  <g fill="#C9362B">
+    <rect x="14.6" y="30.6" width="2.8" height="2.8" transform="rotate(45 16 32)"/>
+    <rect x="46.6" y="30.6" width="2.8" height="2.8" transform="rotate(45 48 32)"/>
+  </g>
+</svg>
