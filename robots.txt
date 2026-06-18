@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://turar.art/sitemap.xml

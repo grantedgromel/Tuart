@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Generate web-optimized versions of the artwork photos.
 
-Produces two sizes per image under photos/web/:
-  photos/web/<name>.jpg        -> grid thumbnails  (<= 1100px long edge)
-  photos/web/large/<name>.jpg  -> lightbox / hero  (<= 1900px long edge)
+Produces two sizes per image under photos/web/, each as JPEG + WebP:
+  photos/web/<name>.{jpg,webp}        -> grid thumbnails  (<= 1100px long edge)
+  photos/web/large/<name>.{jpg,webp}  -> lightbox / hero  (<= 1900px long edge)
+
+The pages serve WebP first via <picture>/<source>, with the JPEG as fallback.
 
 EXIF orientation is baked in (phone photos are rotated correctly), output is
 progressive JPEG. Output filenames are lowercased with spaces -> hyphens so
@@ -24,6 +26,7 @@ LARGE_DIR = os.path.join(OUT_DIR, "large")
 
 GRID_MAX, GRID_Q   = 1100, 80
 LARGE_MAX, LARGE_Q = 1900, 82
+WEBP_Q             = 80   # WebP companion for each JPEG (<picture> serves it first)
 
 # Images referenced by index.html + about.html (the curated set).
 DEFAULT = [
@@ -69,8 +72,12 @@ def main(files):
         name = out_name(fn)
         gp = os.path.join(OUT_DIR, name)
         lp = os.path.join(LARGE_DIR, name)
-        fit(im, GRID_MAX).save(gp, "JPEG", quality=GRID_Q, optimize=True, progressive=True)
-        fit(im, LARGE_MAX).save(lp, "JPEG", quality=LARGE_Q, optimize=True, progressive=True)
+        grid = fit(im, GRID_MAX)
+        grid.save(gp, "JPEG", quality=GRID_Q, optimize=True, progressive=True)
+        grid.save(gp[:-4] + ".webp", "WEBP", quality=WEBP_Q, method=6)
+        large = fit(im, LARGE_MAX)
+        large.save(lp, "JPEG", quality=LARGE_Q, optimize=True, progressive=True)
+        large.save(lp[:-4] + ".webp", "WEBP", quality=WEBP_Q, method=6)
 
         in_kb  = os.path.getsize(src) / 1024
         out_kb = (os.path.getsize(gp) + os.path.getsize(lp)) / 1024
