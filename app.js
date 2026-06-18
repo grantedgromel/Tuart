@@ -295,6 +295,11 @@ window.TURAR_I18N = {
     var lightbox = document.getElementById("lightbox");
     var shots = Array.prototype.slice.call(document.querySelectorAll(".shot"));
     if (!lightbox || !shots.length) return;
+    var WEBP_OK = (function () {
+      try { var c = document.createElement("canvas"); return !!(c.getContext && c.getContext("2d")) && c.toDataURL("image/webp").indexOf("data:image/webp") === 0; }
+      catch (e) { return false; }
+    })();
+    function bestSrc(u) { return WEBP_OK ? u.replace(/\.jpe?g$/i, ".webp") : u; }
     var lbImg = document.getElementById("lb-img");
     var lbCap = document.getElementById("lb-cap");
     var lbClose = document.getElementById("lb-close");
@@ -307,16 +312,18 @@ window.TURAR_I18N = {
       var el = shots[current];
       var work = el.closest(".work");
       var img = el.querySelector("img");
-      var full = el.dataset.full || img.src;
+      var jpg = el.getAttribute("href") || img.src;
+      var full = bestSrc(jpg);
       var title = work ? work.querySelector(".work-title").textContent : "";
       var medium = work ? work.querySelector(".work-medium").textContent : "";
       lbImg.classList.add("is-loading");
       var pre = new Image();
       pre.onload = function () { lbImg.src = full; lbImg.alt = img.alt; lbImg.classList.remove("is-loading"); };
+      pre.onerror = function () { if (full !== jpg) { lbImg.src = jpg; lbImg.alt = img.alt; lbImg.classList.remove("is-loading"); } };
       pre.src = full;
       lbCap.innerHTML = "<em>" + title + "</em>" + medium;
       [current - 1, current + 1].forEach(function (n) {
-        var f = shots[(n + shots.length) % shots.length].dataset.full; if (f) { var im = new Image(); im.src = f; }
+        var f = shots[(n + shots.length) % shots.length].getAttribute("href"); if (f) { var im = new Image(); im.src = bestSrc(f); }
       });
     }
     function open(i) { current = i; lastFocused = shots[i]; render(); lightbox.classList.add("is-open"); document.body.style.overflow = "hidden"; lbClose.focus(); }
@@ -324,8 +331,7 @@ window.TURAR_I18N = {
     function nav(d) { current = (current + d + shots.length) % shots.length; render(); }
 
     shots.forEach(function (shot, i) {
-      shot.addEventListener("click", function () { open(i); });
-      shot.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(i); } });
+      shot.addEventListener("click", function (e) { e.preventDefault(); open(i); });
       var vl = shot.parentNode.querySelector(".view-link");
       if (vl) vl.addEventListener("click", function () { open(i); });
     });
