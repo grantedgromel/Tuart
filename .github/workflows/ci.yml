@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install beautifulsoup4
+      - name: Build site
+        run: python build.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate HTML
+        run: npx --yes html-validate@9 "index.html" "about.html" "ru/**/*.html" "es/**/*.html" "fr/**/*.html" "templates/*.html"
+      - name: Check links
+        run: |
+          npx --yes serve@14 -l 8000 . &
+          npx --yes wait-on@8 http://localhost:8000 -t 20000
+          npx --yes linkinator@6 http://localhost:8000 --recurse \
+            --skip "turar\.art|fonts\.googleapis|fonts\.gstatic|instagram\.com|^mailto:"
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install beautifulsoup4 && python build.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Lighthouse CI (budgets)
+        run: npx --yes @lhci/cli@0.14 autorun
